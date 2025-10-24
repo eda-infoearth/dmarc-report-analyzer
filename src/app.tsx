@@ -10,7 +10,9 @@ export default function App() {
       root={props => (
         <>
           <Nav />
-          <Suspense>{props.children}</Suspense>
+          <Suspense>
+            <div class="px-16 py-8">{props.children}</div>
+          </Suspense>
         </>
       )}
     >
