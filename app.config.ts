@@ -7,7 +7,7 @@ export default defineConfig({
   },
   // ssr: false, // ← SPA構成
   server: {
-    baseURL: "dmarc-report-analyzer",
+    baseURL: "/dmarc-report-analyzer/",
     static: true,
     prerender: {
       failOnError: true,

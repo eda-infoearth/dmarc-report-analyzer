@@ -7,7 +7,8 @@ import "./app.css";
 export default function App() {
   return (
     <Router
-      base={import.meta.env.SERVER_BASE_URL}
+      // base={import.meta.env.SERVER_BASE_URL}
+      base="/dmarc-report-analyzer/"
       root={props => (
         <>
           {/* <Nav /> */}
