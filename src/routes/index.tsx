@@ -59,6 +59,8 @@ export default function Home() {
   // render
   return (
     <div class="bg-pink-200 text-purple-600">
+      <h1>XMLまとめてアップしてくれたら仕訳けするよ～💃</h1>
+      <div class="my-2" />
       <div class="my-2 w-[50vw]">
         <FileDrop label="もらったレポート" onChange={setFileEvent} />
       </div>
