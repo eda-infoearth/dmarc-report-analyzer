@@ -1,0 +1,15 @@
+{
+  "date": "2025-10-28T06:46:20.631Z",
+  "preset": "static",
+  "framework": {
+    "name": "nitro",
+    "version": ""
+  },
+  "versions": {
+    "nitro": "2.12.7"
+  },
+  "commands": {
+    "preview": "npx serve public"
+  },
+  "config": {}
+}
