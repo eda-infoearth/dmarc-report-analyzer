@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background-rgb: 214, 219, 220;
+  --background-rgb: oklch(89.9% 0.061 343.231);
   --foreground-rgb: 0, 0, 0;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background-rgb: 0, 0, 0;
     --foreground-rgb: 255, 255, 255;
   }
-}
+} */
 
 body {
   background: rgb(var(--background-rgb));

@@ -9,9 +9,9 @@ export default function App() {
     <Router
       root={props => (
         <>
-          <Nav />
+          {/* <Nav /> */}
           <Suspense>
-            <div class="px-16 py-8">{props.children}</div>
+            <div class="px-16 py-8 bg-pink-200">{props.children}</div>
           </Suspense>
         </>
       )}
