@@ -8,7 +8,7 @@ export default function App() {
   
   return (
     <Router
-      base={isDev ? "/dmarc-report-analyzer/" : undefined}
+      base={isDev ? "/dmarc-report-analyzer/" : "/dmarc-report-analyzer/"}
       root={props => (
         <>
           <Suspense>
