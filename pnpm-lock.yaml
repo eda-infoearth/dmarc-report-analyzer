@@ -14,6 +14,9 @@ importers:
       '@solidjs/start':
         specifier: ^1.1.0
         version: 1.2.0(solid-js@1.9.9)(vinxi@0.5.8(db0@0.3.4)(ioredis@5.8.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0))(vite@6.4.1(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0))
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
       solid-js:
         specifier: ^1.9.5
         version: 1.9.9
@@ -1167,6 +1170,9 @@ packages:
 
   dax-sh@0.43.2:
     resolution: {integrity: sha512-uULa1sSIHgXKGCqJ/pA0zsnzbHlVnuq7g8O2fkHokWFNwEGIhh5lAJlxZa1POG5En5ba7AU4KcBAvGQWMMf8rg==}
+
+  dayjs@1.11.18:
+    resolution: {integrity: sha512-zFBQ7WFRvVRhKcWoUh+ZA1g2HVgUbsZm9sbddh8EC5iv93sui8DVVz1Npvz+r6meo9VKfa8NyLWBsQK1VvIKPA==}
 
   db0@0.3.4:
     resolution: {integrity: sha512-RiXXi4WaNzPTHEOu8UPQKMooIbqOEyqA1t7Z6MsdxSCeb8iUC9ko3LcmsLmeUt2SM5bctfArZKkRQggKZz7JNw==}
@@ -3829,6 +3835,8 @@ snapshots:
     dependencies:
       '@deno/shim-deno': 0.19.2
       undici-types: 5.28.4
+
+  dayjs@1.11.18: {}
 
   db0@0.3.4: {}
 

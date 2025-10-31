@@ -1,10 +1,15 @@
 
-import { createSignal } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
 
 // components
 import { Button } from "~/components/button";
 import { TextInput, FileDrop } from "~/components/form";
 import { ProgressCircle } from "~/components/progress";
+import { 
+  SuccessReport, typeSuccessReport, 
+  FailedReport, typeFailedReport,
+  ImposterReport, typeImposterReport
+} from "~/components/table";
 // utilities
 import { fileToReport } from "~/utilities/analyze";
 import { typeSucceeded, typeFailed, typeImposter } from "~/utilities/analyze";
@@ -12,12 +17,15 @@ import { typeSucceeded, typeFailed, typeImposter } from "~/utilities/analyze";
 export default function Home() {
   const [fileEvent, setFileEvent] = createSignal<Event | null>(null);
   const [myIp, setMyIp] = createSignal<string>("");
+  const [myDomain, setMyDomain] = createSignal<string>("");
   
-  const [mySucceededReport, setMySucceededReport] = createSignal<typeSucceeded[]>([]);
+  const [successReport, setSuccessReport] = createSignal<typeSuccessReport[]>([]);
   const [noSucceededMessage, setNoSucceededMessage] = createSignal<string>("");
-  const [myFailedReport, setMyFailedReport] = createSignal<typeFailed[]>([]);
+  
+  const [failedReport, setFailedReport] = createSignal<typeFailedReport[]>([]);
   const [noFailedMessage, setNoFailedMessage] = createSignal<string>("");
-  const [imposterReport, setImposterReport] = createSignal<typeImposter[]>([]);
+  
+  const [imposterReport, setImposterReport] = createSignal<typeImposterReport[]>([]);
   const [noImposterMessage, setNoImposterMessage] = createSignal<string>("");
   
   const [loading, setLoading] = createSignal<boolean>(false);
@@ -35,23 +43,84 @@ export default function Home() {
     const tmpImposter: typeImposter[] = [];
 
     for (const file of Array.from(input.files)) {
-      const tmpReport = await fileToReport(file, myIp());
+      const tmpReport = await fileToReport(file, myIp(), myDomain());
       if (!tmpReport) continue;
 
-      (tmpReport.mySucceeded.count > 0) && tmpSucceeded.push(tmpReport.mySucceeded);
-      (tmpReport.myFailed.count > 0) && tmpFailed.push(tmpReport.myFailed);
-      (tmpReport.imposterResult.count > 0) && tmpImposter.push(tmpReport.imposterResult);
+      (tmpReport.mySucceeded.sentCount > 0) && tmpSucceeded.push(tmpReport.mySucceeded);
+      (tmpReport.myFailed.sentCount > 0) && tmpFailed.push(tmpReport.myFailed);
+      (tmpReport.imposterResult.sentCount > 0) && tmpImposter.push(tmpReport.imposterResult);
     }
 
-    setMySucceededReport(tmpSucceeded);
-    tmpSucceeded.length === 0 ? setNoSucceededMessage("なかった～😭") : setNoSucceededMessage("");
-    setMyFailedReport(tmpFailed);
-    tmpFailed.length === 0 ? setNoFailedMessage("なかった～😊") : setNoFailedMessage("");
-    setImposterReport(tmpImposter);
-    tmpImposter.length === 0 ? setNoImposterMessage("なかった～😎") : setNoImposterMessage("");
+    // data.date.date: YYYY-MM-DD
+    tmpSucceeded.sort((a, b) => Number(new Date(a.date.date)) - Number(new Date(b.date.date)));
+    const combinedSucceeded = combineSuccessed( tmpSucceeded );
+    tmpFailed.sort((a, b) => Number(new Date(a.date.date)) - Number(new Date(b.date.date)));
+    const combinedFailed = combineFailed( tmpFailed );
+    tmpImposter.sort((a, b) => Number(new Date(a.date.date)) - Number(new Date(b.date.date)));
+    const combinedImposter = combineImposter( tmpImposter );
+
+    setSuccessReport(combinedSucceeded);
+    combinedSucceeded.length === 0 ? setNoSucceededMessage("なかった～😭") : setNoSucceededMessage("");
+    setFailedReport(combinedFailed);
+    combinedFailed.length === 0 ? setNoFailedMessage("なかった～😊") : setNoFailedMessage("");
+    setImposterReport(combinedImposter);
+    combinedImposter.length === 0 ? setNoImposterMessage("なかった～😎") : setNoImposterMessage("");
+
     setLoading(false);
   };
   
+  const combineSuccessed = (reports: typeSucceeded[]): typeSuccessReport[] => {
+    const combined: typeSuccessReport[] = [];
+    reports.forEach((report) => {
+      combined.push({
+        date: report.date.date,
+        time: `${report.date.startTime}～${report.date.endTime}`,
+        sentTo: report.sentTo,
+        sentCount: report.sentCount,
+        reporter: report.reporter,
+      });
+    });
+    console.log("combined:", combined);
+    return combined;
+  };
+  
+  const combineFailed = (reports: typeFailed[]): typeFailedReport[] => {
+    const combined: typeFailedReport[] = [];
+    reports.forEach((report) => {
+      const resultStr = report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
+      const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
+      
+      combined.push({
+          date: report.date.date,
+          time: `${report.date.startTime}～${report.date.endTime}`,
+          reporter: report.reporter,
+          sentCount: report.sentCount,
+          sentTo: report.sentTo,
+          result: resultStr,
+          reason: reasonStr,
+        });
+    });
+    console.log("combined:", combined);
+    return combined;
+  };
+  
+  const combineImposter = (reports: typeImposter[]): typeImposterReport[] => {
+    const combined: typeImposterReport[] = [];
+    reports.forEach((report) => {
+      combined.push({
+        date: report.date.date,
+        time: `${report.date.startTime}～${report.date.endTime}`,
+        reporter: report.reporter,
+        sentCount: report.sentCount,
+        sentTo: report.sentTo,
+        sentFrom: report.sentFrom,
+        sentFromIps: report.sentFromIps,
+      });
+    });
+    console.log("combined:", combined);
+    return combined;
+  };
+
   // ====================================================================================================
   // effects
 
@@ -61,94 +130,42 @@ export default function Home() {
     <div class="bg-pink-200 text-purple-600">
       <h1>XMLまとめてアップしてくれたら仕訳けするよ～💃</h1>
       <div class="my-2" />
+      <div class="my-2 w-[50vw] grid grid-cols-2 gap-8">
+        <TextInput label="うちのIP" onChange={(v) => setMyIp(v)} />
+        <TextInput label="うちのドメイン" onChange={(v) => setMyDomain(v)} />
+      </div>
       <div class="my-2 w-[50vw]">
         <FileDrop label="もらったレポート" onChange={setFileEvent} />
       </div>
-      <div class="my-2 w-[50vw]">
-        <TextInput label="うちのIP" onChange={(v) => setMyIp(v)} />
-      </div>
       <div class="my-2" />
-      <Button 
-        label="✨️チェックするよ～" 
-        type="cute"
-        disabled={(fileEvent() === null || myIp() === "") || loading()} 
-        onClick={() => formHandler(fileEvent())} 
-      />
+      <div class="w-[50vw] flex justify-center">
+        <Button 
+          label="✨️チェックするよ～" 
+          type="cute"
+          disabled={(fileEvent() === null || myIp() === "") || myDomain() === "" || loading()} 
+          onClick={() => formHandler(fileEvent())} 
+        />
+      </div>
       <div class="my-8" />
       <ProgressCircle loading={loading()} />
       <div class="my-8" />
       
       <h1>🚫 DMARCレポ 怪しいやつ～ 💀</h1>
       <div class="my-2" />
-      <div class="overflow-x-auto shadow-lg rounded-2xl bg-white/80 backdrop-blur-md border border-pink-200">
-        <table class="uppercase tracking-wide min-w-full text-sm text-white bg-red-600">
-          <thead>
-            <tr>
-              <th class="px-4 py-3 text-left">数</th>
-              <th class="px-4 py-3 text-left">送信先IP</th>
-              <th class="px-4 py-3 text-left">送信元IP</th>
-              <th class="px-4 py-3 text-left">送信元ドメイン</th>
-            </tr>
-          </thead>
-          <tbody class="rounded">
-            {imposterReport().map((r, i) => (
-              <tr class={`border-b border-pink-100 transition-colors duration-200 text-red-800 hover:bg-pink-50 ${i % 2 === 0 ? "bg-red-100" : "bg-red-200"}`}>
-                <td class={`px-4 py-2`}>{r.count}</td>
-                <td class={`px-4 py-2 w-md`}>{r.reporter}</td>
-                <td class={`px-4 py-2 w-lg`}>{r.ips.join(", ")}</td>
-                <td class={`px-4 py-2 w-md`}>{r.senders?.join(", ")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ImposterReport data={imposterReport()} />
       <p>{noImposterMessage()}</p>
-      <div class="my-8" />
-      
-      <h1>✅ DMARCレポ うちの大丈夫なやつ～ 😊</h1>
-      <div class="my-2" />
-      <div class="w-[50%] overflow-x-auto shadow-lg rounded-2xl bg-white/80 backdrop-blur-md border border-blue-200">
-        <table class="uppercase tracking-wide min-w-full text-sm text-white bg-blue-500">
-          <thead>
-            <tr>
-              <th class="px-4 py-3 text-left">数</th>
-              <th class="px-4 py-3 text-left w-md">送信先IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mySucceededReport().map((r, i) => (
-              <tr class={`border-b border-pink-100 transition-colors duration-200 text-blue-800 hover:bg-blue-50 ${i % 2 === 0 ? "bg-blue-100" : "bg-blue-200"}`}>
-                <td class="px-4 py-2">{r.count}</td>
-                <td class="px-4 py-2 w-md">{r.reporter}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p>{noSucceededMessage()}</p>
       <div class="my-8" />
       
       <h1>❌️ DMARCレポ うちのダメだったやつ～ 😭</h1>
       <div class="my-2" />
-      <div class="w-[50%] overflow-x-auto shadow-lg rounded-2xl bg-white/80 backdrop-blur-md border border-yellow-200">
-        <table class="uppercase tracking-wide min-w-full text-sm text-red-800 bg-yellow-500">
-          <thead>
-            <tr>
-              <th class="px-4 py-3 text-left">数</th>
-              <th class="px-4 py-3 text-left w-md">送信先IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {myFailedReport().map((r, i) => (
-              <tr class={`border-b border-pink-100 transition-colors duration-200 text-red-800 hover:bg-yellow-50 ${i % 2 === 0 ? "bg-yellow-100" : "bg-yellow-200"}`}>
-                <td class="px-4 py-2">{r.count}</td>
-                <td class="px-4 py-2 w-md">{r.reporter}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <FailedReport data={failedReport()} />
       <p>{noFailedMessage()}</p>
+      <div class="my-8" />
+      
+      <h1>✅ DMARCレポ うちの大丈夫なやつ～ 😊</h1>
+      <div class="my-2" />
+      <SuccessReport data={successReport()} />
+      <p>{noSucceededMessage()}</p>
     </div>
   );
 };
