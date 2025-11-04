@@ -16,18 +16,18 @@ const defaultDate: typeDateRange = {
 export interface typeSucceeded {
   date: typeDateRange; // レポート日付
   sentTo: string[];      // 送信先ドメイン
-  sentCount: number;   // 自社IPからの成功件数
+  sentCount: number[];   // 自社IPからの成功件数
   reporter: string;
 };
 
 export interface typeFailed {
   date: typeDateRange; // レポート日付
   sentTo: string[];      // 送信先ドメイン
-  sentCount: number;   // 自社IPからの失敗件数
+  sentCount: number[];   // 自社IPからの失敗件数
   policy: "none" | "quarantine" | "reject";      // DMARCポリシー
-  disposition: "none" | "quarantine" | "reject";
-  dkimResult: "pass" | "fail" | "none";
-  spfResult: "pass" | "fail" | "none";
+  disposition: "none" | "quarantine" | "reject"; // 受信側の処理方針
+  dkimResult: "pass" | "fail" | "none"; // DKIM認証結果
+  spfResult: "pass" | "fail" | "none"; // SPF認証結果
   reporter: string;
 };
 
@@ -36,7 +36,10 @@ export interface typeImposter {
   sentTo: string[];      // 送信先ドメイン
   sentFrom: string[];  // 送信元ドメイン
   sentFromIps: string[];       // 不正送信元IPリスト
-  sentCount: number;   // 自社ドメインだけど別IPから送られてる件数
+  sentCount: number[];   // 自社ドメインだけど別IPから送られてる件数
+  disposition: "none" | "quarantine" | "reject"; // 受信側の処理方針
+  dkimResult: "pass" | "fail" | "none"; // DKIM認証結果
+  spfResult: "pass" | "fail" | "none"; // SPF認証結果
   reporter: string;
 };
 
@@ -62,13 +65,13 @@ export const fileToReport = async (
     const mySucceeded: typeSucceeded = { 
       date: {...defaultDate},
       sentTo: [],
-      sentCount: 0,
+      sentCount: [],
       reporter: "",
     };
     const myFailed: typeFailed = {
       date: {...defaultDate},
       sentTo: [],
-      sentCount: 0,
+      sentCount: [],
       policy: "none",
       disposition: "none",
       dkimResult: "none",
@@ -80,7 +83,10 @@ export const fileToReport = async (
       sentTo: [],
       sentFrom: [],
       sentFromIps: [],
-      sentCount: 0,
+      disposition: "none",
+      dkimResult: "none",
+      spfResult: "none",
+      sentCount: [],
       reporter: "",
     };
 
@@ -148,12 +154,12 @@ export const fileToReport = async (
         if (result === "OK") {
           mySucceeded.date = {...dateRange};
           !mySucceeded.sentTo.includes(envelopeTo) && mySucceeded.sentTo.push(envelopeTo);
-          mySucceeded.sentCount = count;
+          mySucceeded.sentCount.push(count);
           mySucceeded.reporter = reporter;
         } else {
           myFailed.date = dateRange;
           !myFailed.sentTo.includes(envelopeTo) && myFailed.sentTo.push(envelopeTo);
-          myFailed.sentCount += count;
+          myFailed.sentCount.push(count);
           myFailed.policy = policyDomain as "none" | "quarantine" | "reject";
           myFailed.disposition = disposition as "none" | "quarantine" | "reject";
           myFailed.dkimResult = dkimResult as "pass" | "fail" | "none";
@@ -166,7 +172,10 @@ export const fileToReport = async (
         !imposterResult.sentTo.includes(envelopeTo) && imposterResult.sentTo.push(envelopeTo);
         !imposterResult.sentFrom.includes(sentFrom) && imposterResult.sentFrom.push(sentFrom);
         !imposterResult.sentFromIps.includes(sourceIp) && imposterResult.sentFromIps.push(sourceIp);
-        imposterResult.sentCount += count;
+        imposterResult.disposition = disposition as "none" | "quarantine" | "reject";
+        imposterResult.dkimResult = dkimResult as "pass" | "fail" | "none";
+        imposterResult.spfResult = spfResult as "pass" | "fail" | "none";
+        imposterResult.sentCount.push(count);
         imposterResult.reporter = reporter;
       }
     });

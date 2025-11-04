@@ -11,10 +11,12 @@ export interface typeImposterReport {
   date: string; // YYYY-MM-DD
   time: string; // HH:MM～HH:MM
   reporter: string;
-  sentCount: number; // 自社ドメインだけど別IPから送られてる件数
+  sentCount: number[]; // 自社ドメインだけど別IPから送られてる件数
   sentTo: string[]; // 送信先ドメイン
   sentFrom: string[]; // 送信元ドメイン
   sentFromIps: string[]; // 不正送信元IPリスト
+  result: string; // 迷惑メール入り or 完全拒否
+  reason: string; // DKIMがNG or SPFがNG
 };
 
 type Props = {
@@ -44,6 +46,8 @@ export const ImposterReport = (props: Props) => {
             <th class="px-4 py-3 text-center">送信先ドメイン</th>
             <th class="px-4 py-3 text-center">送信元ドメイン</th>
             <th class="px-4 py-3 text-center">送信元IP</th>
+            <th class="px-4 py-3 text-center">結果</th>
+            <th class="px-4 py-3 text-center">理由</th>
           </tr>
         </thead>
         <tbody>
@@ -62,10 +66,12 @@ export const ImposterReport = (props: Props) => {
                     </Show>
                     <td class="px-4 py-3">{r.time}</td>
                     <td class="px-4 py-3">{r.reporter}</td>
-                    <td class="px-4 py-3">{r.sentCount}</td>
+                    <td class="px-4 py-3">{r.sentCount.map((c) => <p>{c}</p>)}</td>
                     <td class="px-4 py-3">{r.sentTo.map((to) => <p>{to}</p>)}</td>
                     <td class="px-4 py-2">{r.sentFrom.map((from) => <p>{from}</p>)}</td>
                     <td class="px-4 py-2">{r.sentFromIps.map((ip) => <p>{ip}</p>)}</td>
+                    <td class="px-4 py-3">{r.result}</td>
+                    <td class="px-4 py-3">{r.reason}</td>
                   </tr>
                 )}
               </For>

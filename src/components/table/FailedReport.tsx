@@ -5,7 +5,7 @@ export interface typeFailedReport {
   date: string; // YYYY-MM-DD
   time: string; // HH:MM～HH:MM
   reporter: string;
-  sentCount: number; // 自社IPからの失敗件数
+  sentCount: number[]; // 自社IPからの失敗件数
   sentTo: string[]; // 送信先ドメイン
   result: string; // 迷惑メール入り or 完全拒否
   reason: string; // DKIMがNG or SPFがNG
@@ -56,7 +56,7 @@ export const FailedReport = (props: Props) => {
                     </Show>
                     <td class="px-4 py-3">{r.time}</td>
                     <td class="px-4 py-3">{r.reporter}</td>
-                    <td class="px-4 py-3">{r.sentCount}</td>
+                    <td class="px-4 py-3">{r.sentCount.map((c) => <p>{c}</p>)}</td>
                     <td class="px-4 py-3">{r.sentTo.map((to) => <p>{to}</p>)}</td>
                     <td class="px-4 py-3">{r.result}</td>
                     <td class="px-4 py-3">{r.reason}</td>

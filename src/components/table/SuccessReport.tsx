@@ -11,7 +11,7 @@ export interface typeSuccessReport {
   date: string; // YYYY-MM-DD
   time: string; // HH:MM～HH:MM
   reporter: string;
-  sentCount: number; // 自社IPからの成功件数
+  sentCount: number[]; // 自社IPからの成功件数
   sentTo: string[]; // 送信先ドメイン
 };
 
@@ -58,7 +58,7 @@ export const SuccessReport = (props: Props) => {
                     </Show>
                     <td class="px-4 py-3">{r.time}</td>
                     <td class="px-4 py-3">{r.reporter}</td>
-                    <td class="px-4 py-3">{r.sentCount}</td>
+                    <td class="px-4 py-3">{r.sentCount.map((c) => <p>{c}</p>)}</td>
                     <td class="px-4 py-3">{r.sentTo.map((to) => <p>{to}</p>)}</td>
                   </tr>
                 )}

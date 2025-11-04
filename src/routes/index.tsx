@@ -46,9 +46,9 @@ export default function Home() {
       const tmpReport = await fileToReport(file, myIp(), myDomain());
       if (!tmpReport) continue;
 
-      (tmpReport.mySucceeded.sentCount > 0) && tmpSucceeded.push(tmpReport.mySucceeded);
-      (tmpReport.myFailed.sentCount > 0) && tmpFailed.push(tmpReport.myFailed);
-      (tmpReport.imposterResult.sentCount > 0) && tmpImposter.push(tmpReport.imposterResult);
+      (tmpReport.mySucceeded.sentCount.length > 0) && tmpSucceeded.push(tmpReport.mySucceeded);
+      (tmpReport.myFailed.sentCount.length > 0) && tmpFailed.push(tmpReport.myFailed);
+      (tmpReport.imposterResult.sentCount.length > 0) && tmpImposter.push(tmpReport.imposterResult);
     }
 
     // data.date.date: YYYY-MM-DD
@@ -107,6 +107,9 @@ export default function Home() {
   const combineImposter = (reports: typeImposter[]): typeImposterReport[] => {
     const combined: typeImposterReport[] = [];
     reports.forEach((report) => {
+      const resultStr = report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
+      const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
+      
       combined.push({
         date: report.date.date,
         time: `${report.date.startTime}～${report.date.endTime}`,
@@ -115,6 +118,8 @@ export default function Home() {
         sentTo: report.sentTo,
         sentFrom: report.sentFrom,
         sentFromIps: report.sentFromIps,
+        result: resultStr,
+        reason: reasonStr,
       });
     });
     console.log("combined:", combined);
