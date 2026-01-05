@@ -138,8 +138,16 @@ export default function Home() {
 
     reports.forEach((report) => {
       report.sentCount.map(count => totalCount += count);
-      const resultStr = report.disposition === "none" ? "受信（要チェケ）🤔" : report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
-      const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
+      const resultStr = report.disposition === "none" 
+        ? "受信（要チェケ）🤔" 
+        : report.disposition === "quarantine" 
+          ? "迷惑メール入り🤫" 
+          : "完全拒否😤";
+      const reasonStr = report.dkimResult == "pass" 
+        ? "DKIMおけぽ" 
+        : report.spfResult == "pass" 
+          ? "SPFおけぽ" 
+          : "両方ムリ";
       
       combined.push({
         date: report.date.date,
