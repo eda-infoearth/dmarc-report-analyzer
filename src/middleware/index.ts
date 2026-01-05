@@ -6,16 +6,16 @@ import { createMiddleware } from "@solidjs/start/middleware";
 const nonce = crypto.randomUUID();
 console.log("middleware nonce:", nonce);
 // add: CSP header middleware
-const csp = `
-default-src 'self'; 
-script-src 'self' 'nonce-${nonce}'; 
-style-src 'self' 'nonce-${nonce}';
-`;
+// const csp = `
+// default-src 'self'; 
+// script-src 'self' 'nonce-${nonce}'; 
+// style-src 'self' 'nonce-${nonce}';
+// `;
 
 export default createMiddleware({
   onRequest: (event) => {
     event.locals.startTime = Date.now();
-    event.response.headers.set("Content-Security-Policy", csp);
+    // event.response.headers.set("Content-Security-Policy", csp);
     event.response.headers.set("X-Content-Type-Options", "nosniff");
     event.response.headers.set("X-Frame-Options", "DENY");
     event.response.headers.set("Referrer-Policy", "no-referrer");
