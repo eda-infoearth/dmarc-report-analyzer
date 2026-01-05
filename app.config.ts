@@ -8,7 +8,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  ...(isDev && {
+  ...(!isDev && {
     ssr: true, // ← SPA構成
     server: {
     baseURL: "/dmarc-report-analyzer/",
