@@ -235,7 +235,7 @@ export const fileToReport = async (
       // 送信元ドメイン（メールファイルの中身のヘッダー部分）
       // <header_from></header_from>
     // 
-    // 送信認証結果の詳細情報
+    // 送信認証結果の詳細情報（このアプリでの判定には使用しない）
     // <auth_results></auth_results>
       // DKIM検証結果（署名ドメインやselector付き）
       // <dkim> ... </dkim>

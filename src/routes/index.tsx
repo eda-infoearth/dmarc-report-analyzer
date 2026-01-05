@@ -107,7 +107,7 @@ export default function Home() {
   const combineImposter = (reports: typeImposter[]): typeImposterReport[] => {
     const combined: typeImposterReport[] = [];
     reports.forEach((report) => {
-      const resultStr = report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
+      const resultStr = report.disposition === "none" ? "受信（要チェケ）🤔" : report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
       const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
       
       combined.push({
