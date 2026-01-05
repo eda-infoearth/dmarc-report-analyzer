@@ -19,12 +19,15 @@ export default function Home() {
   const [myIp, setMyIp] = createSignal<string>("");
   const [myDomain, setMyDomain] = createSignal<string>("");
   
+  const [successCount, setSuccessCount] = createSignal<number>(0);
   const [successReport, setSuccessReport] = createSignal<typeSuccessReport[]>([]);
   const [noSucceededMessage, setNoSucceededMessage] = createSignal<string>("");
   
+  const [failedCount, setFailedCount] = createSignal<number>(0);
   const [failedReport, setFailedReport] = createSignal<typeFailedReport[]>([]);
   const [noFailedMessage, setNoFailedMessage] = createSignal<string>("");
   
+  const [imposterCount, setImposterCount] = createSignal<number>(0);
   const [imposterReport, setImposterReport] = createSignal<typeImposterReport[]>([]);
   const [noImposterMessage, setNoImposterMessage] = createSignal<string>("");
   
@@ -37,6 +40,7 @@ export default function Home() {
     const input = e.target as HTMLInputElement;
     if (!input.files) return;
     setLoading(true);
+    resetSignal();
 
     const tmpSucceeded: typeSucceeded[] = [];
     const tmpFailed: typeFailed[] = [];
@@ -68,10 +72,28 @@ export default function Home() {
 
     setLoading(false);
   };
+
+  const resetSignal = () => {
+    setSuccessCount(0);
+    setSuccessReport([]);
+    setNoSucceededMessage("");
+
+    setFailedCount(0);
+    setFailedReport([]);
+    setNoFailedMessage("");
+
+    setImposterCount(0);
+    setImposterReport([]);
+    setNoImposterMessage("");
+  };
   
   const combineSuccessed = (reports: typeSucceeded[]): typeSuccessReport[] => {
     const combined: typeSuccessReport[] = [];
+    let totalCount = 0;
+
     reports.forEach((report) => {
+      report.sentCount.map(count => totalCount += count);
+
       combined.push({
         date: report.date.date,
         time: `${report.date.startTime}～${report.date.endTime}`,
@@ -80,13 +102,18 @@ export default function Home() {
         reporter: report.reporter,
       });
     });
-    console.log("combined:", combined);
+    
+    setSuccessCount(totalCount);
     return combined;
   };
   
   const combineFailed = (reports: typeFailed[]): typeFailedReport[] => {
     const combined: typeFailedReport[] = [];
+    let totalCount = 0;
+
     reports.forEach((report) => {
+      report.sentCount.map(count => totalCount += count);
+
       const resultStr = report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
       const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
       
@@ -100,13 +127,17 @@ export default function Home() {
           reason: reasonStr,
         });
     });
-    console.log("combined:", combined);
+    
+    setFailedCount(totalCount);
     return combined;
   };
   
   const combineImposter = (reports: typeImposter[]): typeImposterReport[] => {
     const combined: typeImposterReport[] = [];
+    let totalCount = 0;
+
     reports.forEach((report) => {
+      report.sentCount.map(count => totalCount += count);
       const resultStr = report.disposition === "none" ? "受信（要チェケ）🤔" : report.disposition === "quarantine" ? "迷惑メール入り🤫" : "完全拒否😤";
       const reasonStr = report.dkimResult !== "pass" ? "DKIMがNG" : report.spfResult !== "pass" ? "SPFがNG" : "不明";
       
@@ -122,7 +153,8 @@ export default function Home() {
         reason: reasonStr,
       });
     });
-    console.log("combined:", combined);
+    
+    setImposterCount(totalCount);
     return combined;
   };
 
@@ -157,17 +189,23 @@ export default function Home() {
       
       <h1>🚫 DMARCレポ 怪しいやつ～ 💀</h1>
       <div class="my-2" />
+      {(imposterReport().length > 0 || noImposterMessage() !== "") && `合計：${imposterCount()}通`}
+      <div class="my-2" />
       <ImposterReport data={imposterReport()} />
       <p>{noImposterMessage()}</p>
       <div class="my-8" />
       
       <h1>❌️ DMARCレポ うちのダメだったやつ～ 😭</h1>
       <div class="my-2" />
+      {(failedReport().length > 0 || noFailedMessage() !== "") && `合計：${failedCount()}通`}
+      <div class="my-2" />
       <FailedReport data={failedReport()} />
       <p>{noFailedMessage()}</p>
       <div class="my-8" />
       
       <h1>✅ DMARCレポ うちの大丈夫なやつ～ 😊</h1>
+      <div class="my-2" />
+      {(successReport().length > 0 || noSucceededMessage() !== "") && `合計：${successCount()}通`}
       <div class="my-2" />
       <SuccessReport data={successReport()} />
       <p>{noSucceededMessage()}</p>
