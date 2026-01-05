@@ -4,11 +4,11 @@ import { Suspense } from "solid-js";
 import "./app.css";
 
 export default function App() {
-  const isDev = import.meta.env.IS_DEVELOPMENT === "true";
+  const isDev = process.env.IS_DEVELOPMENT === "true";
   
   return (
     <Router
-      base={isDev ? "/dmarc-report-analyzer/" : "/dmarc-report-analyzer/"}
+      base={isDev ? "/" : "/dmarc-report-analyzer/"}
       root={props => (
         <>
           <Suspense>

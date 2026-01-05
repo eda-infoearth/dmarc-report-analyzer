@@ -125,6 +125,7 @@ export const fileToReport = async (
       const dkimResult = policyEvaluated?.getElementsByTagName("dkim")[0]?.textContent ?? "";
       const spfResult = policyEvaluated?.getElementsByTagName("spf")[0]?.textContent ?? "";
       const disposition = policyEvaluated?.getElementsByTagName("disposition")[0]?.textContent ?? "";
+      console.log(disposition);
 
       const dkimPass = dkimResult === "pass";
       const spfPass = spfResult === "pass";

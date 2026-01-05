@@ -1,7 +1,14 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
 
+// import nonce from middleware
+// const nonce = crypto.randomUUID();
+// const nonce = (event: Request) => {
+//   return event.headers.get("csp-nonce") || "";
+// };
+
 export default createHandler(() => {
+  // add nonce to script/style tags
   return (
     <StartServer
       document={({ assets, children, scripts }) => (
@@ -24,5 +31,6 @@ export default createHandler(() => {
         </html>
       )}
     />
-  );
-});
+  );},
+  // event => ({ nonce: event.locals.nonce })
+);

@@ -10,7 +10,12 @@ console.log("middleware nonce:", nonce);
 // default-src 'self'; 
 // script-src 'self' 'nonce-${nonce}'; 
 // style-src 'self' 'nonce-${nonce}';
-// `;
+// `.replace(/\n/g, " ").trim();
+// const csp = `
+// default-src 'self'; 
+// script-src 'self'; 
+// style-src 'self' 'unsafe-inline';
+// `.replace(/\n/g, " ").trim();
 
 export default createMiddleware({
   onRequest: (event) => {
